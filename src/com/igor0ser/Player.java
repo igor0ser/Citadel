@@ -55,16 +55,25 @@ public class Player implements Comparable {
 			}
 		}
 		System.out.println("// " + mName + "has built a " + buildingThisTurn);
-		mCoins=(byte) (mCoins-buildingThisTurn.getmPrice());
+		mCoins = (byte) (mCoins - buildingThisTurn.getmPrice());
 		mTable.add(buildingThisTurn);
 		mHand.remove(buildingThisTurn);
 		return buildingThisTurn;
-		
+
 	}
 
 	public byte takeMoney() {
 		mCoins += 2;
 		System.out.println("// " + mName + " get 2 coins");
+		return mCoins;
+	}
+
+	public byte moneyForDistricts() {
+		for (District d : mTable) {
+			if (d.getmColor().equals(this.mCharacter.getmColor())) {
+				this.mCoins++;
+			}
+		}
 		return mCoins;
 	}
 
@@ -108,7 +117,7 @@ public class Player implements Comparable {
 	}
 
 	public void addmCoins(byte addCoins) {
-		mCoins+= addCoins;
+		mCoins += addCoins;
 	}
 
 	public ArrayList<District> getmTable() {

@@ -19,20 +19,15 @@ public class Character {
 
 	@Override
 	public String toString() {
-		return "[id=" + id + ", came=" + mName + ", color="
-				+ mColor + "]";
+		return "[id=" + id + ", came=" + mName + ", color=" + mColor + "]";
 	}
 
-	enum Name{
-		ASSASIN,
-		THIEF,
-		MAGICIAN,
-		KING,
-		BISHOP,
-		MERCHANT,
-		ARCHITECT,
-		WARLORD
+	enum Name {
+		ASSASIN, THIEF, MAGICIAN, KING, BISHOP, MERCHANT, ARCHITECT, WARLORD
 	}
-	
-	
+
+	public Color getmColor() {
+		return mColor;
+	}
+
 }

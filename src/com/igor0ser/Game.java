@@ -14,7 +14,7 @@ public class Game implements Comparable {
 	private List<Player> mPlayers = new ArrayList<Player>(); // игроки
 	private List<Player> mPlayers2 = new ArrayList<Player>(); // игроки - для нахождения Короля
 	private ArrayDeque<District> mDistrictDeck = new ArrayDeque<District>(); // колода кварталов
-	private List<Character> mCharacterDeck = new ArrayList<Character>();; // колода персонажей
+	private List<Character> mCharacterDeck; // колода персонажей
 	private Random random = new Random();
 
 	public Game(String userName) {
@@ -42,9 +42,9 @@ public class Game implements Comparable {
 
 	}
 
-	public Character step1() {//первые персонажи выбрасываются
+	public Character step1() {
 		fillCharacterDeck();
-
+		mCharacterDeck = new ArrayList<Character>();
 		mCharacterDeck.remove(random.nextInt(mCharacterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
 		return mCharacterDeck.remove(random.nextInt(mCharacterDeck.size())); // одного - рубашкой вверх
 	}
@@ -72,8 +72,18 @@ public class Game implements Comparable {
 	public void step3() {
 		Collections.sort(mPlayers);
 		for (Player p : mPlayers) {
+			p.moneyForDistricts();
 			p.turn();
 		}
+	}
+	
+	public boolean step4() {
+		for (Player p : mPlayers) {
+			if (p.getmHand().size()>8){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void fillCharacterDeck() {
