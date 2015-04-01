@@ -4,44 +4,42 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import com.igor0ser.Character.Name;
 
 public class Game implements Comparable {
 	private String userName; // имя игрока-человека
-	private ArrayList<Player> mPlayers; // игроки
-	private ArrayList<Player> mPlayers2; // игроки - для нахождения Короля
-	private ArrayDeque<District> mDistrictDeck; // колода кварталов
-	private ArrayList<Character> mCharacterDeck; // колода персонажей
-	private Random random;
+	private List<Player> mPlayers = new ArrayList<Player>(); // игроки
+	private List<Player> mPlayers2 = new ArrayList<Player>(); // игроки - для нахождения Короля
+	private ArrayDeque<District> mDistrictDeck = new ArrayDeque<District>(); // колода кварталов
+	private List<Character> mCharacterDeck = new ArrayList<Character>();; // колода персонажей
+	private Random random = new Random();
 
 	public Game(String userName) {
 		this.userName = userName;
 		random = new Random();
-		mPlayers2 = new ArrayList<Player>(); //запасной лист для игроков
-		mPlayers = new ArrayList<Player>(); // Список игорков, всего 5 пока
-		mPlayers.add(new PlayerUser(userName));  //добавляем всех в список
+		//mPlayers2 = new ArrayList<Player>(); //запасной лист для игроков
+		//mPlayers = new ArrayList<Player>(); // Список игорков, всего 5 пока
+		mPlayers.add(new PlayerUser(userName)); //добавляем всех в список
 		mPlayers.add(new Player("Eddard Stark"));
 		mPlayers.add(new Player("Robert Baratheon"));
 		mPlayers.add(new Player("Rhaegar Targaryen"));
 		mPlayers.add(new Player("Tywin Lannister"));
 		mPlayers.get(random.nextInt(5)).setKing(true);
-		
-		mDistrictDeck = new ArrayDeque<District>();
-		mDistrictDeck.addAll(DistrictDeckList()); //колода кварталов
-		
-		
-		
-		for (Player player : mPlayers){
-			for(int i = 0; i<4; i++){
-			System.out.println(player.getmName() + " received " + mDistrictDeck.peek());
-			player.addCard(mDistrictDeck.poll()); // каждому по 4 карты квартала
+		mDistrictDeck.addAll(DistrictDeckList()); // заполняем колоду кварталов
+
+		for (Player player : mPlayers) {
+			for (int i = 0; i < 4; i++) {
+				System.out.println(player.getmName() + " received "
+						+ mDistrictDeck.peek());
+				player.addCard(mDistrictDeck.poll()); // каждому по 4 карты квартала
 			}
 		}
-		
+
 		mCharacterDeck = new ArrayList<Character>();
-		
+
 	}
 
 	public Character step1() {//первые персонажи выбрасываются

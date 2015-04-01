@@ -1,10 +1,10 @@
 package com.igor0ser;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Player implements Comparable {
-
 
 	public Character getmCharacter() {
 		return mCharacter;
@@ -16,20 +16,16 @@ public class Player implements Comparable {
 
 	private String mName;
 	private byte mPoints;
-	private byte mCoins;
-	private ArrayList<District> mHand;
-	private ArrayList<District> mTable;
+	private byte mCoins = 2;
+	private ArrayList<District> mHand = new ArrayList<District>();
+	private ArrayList<District> mTable = new ArrayList<District>();
 	private Character mCharacter;
 	private byte mDistrictsBuild;
 	private boolean isKing;
-	private Random random;
+	private Random random = new Random();
 
 	public Player(String name) {
-		random = new Random();
 		mName = name;
-		mCoins = 2;
-		mHand = new ArrayList<District>();
-		mTable = new ArrayList<District>();
 	}
 
 	public void addCard(District districtCard) {
@@ -44,12 +40,12 @@ public class Player implements Comparable {
 		this.isKing = isKing;
 	}
 
-	public void chooseCharacter(ArrayList<Character> characterDeck) {
+	public void chooseCharacter(List<Character> characterDeck) {
 		mCharacter = characterDeck.remove(random.nextInt(characterDeck.size()));
 		System.out.println("// " + mName + " has chosen " + mCharacter);
 	}
 
-	public void build() {
+	public District build() {
 		byte max = 0;
 		District buildingThisTurn = null;
 		for (District district : mHand) {
@@ -59,29 +55,29 @@ public class Player implements Comparable {
 			}
 		}
 		System.out.println("// " + mName + "has built a " + buildingThisTurn);
-		
+		mCoins=(byte) (mCoins-buildingThisTurn.getmPrice());
 		mTable.add(buildingThisTurn);
 		mHand.remove(buildingThisTurn);
-
+		return buildingThisTurn;
 		
-
 	}
 
-	public void takeMoney() {
+	public byte takeMoney() {
 		mCoins += 2;
 		System.out.println("// " + mName + " get 2 coins");
+		return mCoins;
 	}
 
 	public void turn() {
 		boolean canBuild = false;
 		for (District district : mHand) {
 			if (mCoins > district.getmPrice())
-				canBuild = true;
+				canBuild = true; // проверяет хватает ли денег на постройку квартала
 		}
-		
-		if ((random.nextInt(2) == 0) && canBuild) {
+
+		if ((random.nextInt(2) == 0) && canBuild) { // на рэндоме или строит или берет монеты 
 			build();
-		}	else {
+		} else {
 			takeMoney();
 		}
 
@@ -105,5 +101,21 @@ public class Player implements Comparable {
 
 	public void setmName(String mName) {
 		this.mName = mName;
+	}
+
+	public byte getmCoins() {
+		return mCoins;
+	}
+
+	public void addmCoins(byte addCoins) {
+		mCoins+= addCoins;
+	}
+
+	public ArrayList<District> getmTable() {
+		return mTable;
+	}
+
+	public ArrayList<District> getmHand() {
+		return mHand;
 	}
 }

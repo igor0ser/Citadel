@@ -2,10 +2,11 @@ package com.igor0ser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class PlayerUser extends Player {
-	private Scanner mScanner;
+	private Scanner mScanner = new Scanner(System.in);;
 	public PlayerUser(String name) {
 		super(name);
 	}
@@ -15,10 +16,10 @@ public class PlayerUser extends Player {
 	
 	@Override
 
-	public void chooseCharacter(ArrayList<Character> characterDeck){
+	public void chooseCharacter(List<Character> characterDeck){
+		
 		System.out.println("choose a character");
 		System.out.println(Arrays.toString(characterDeck.toArray()));
-		mScanner = new Scanner(System.in);
 		byte choice = mScanner.nextByte();
 		for (Character ch : characterDeck){
 			if (ch.getId()==choice){
@@ -29,4 +30,28 @@ public class PlayerUser extends Player {
 			}
 		System.out.println("You have chosen: " + super.getmCharacter());
 	}
+	
+	public void turn() {
+		System.out.println("your money: " + this.getmCoins());
+		System.out.println("your hand: " + Arrays.toString(this.getmHand().toArray()));
+		System.out.println("Choose: money(0) or build(1)?");
+		byte choice = mScanner.nextByte();
+			if (choice==1){
+				this.build();
+			}
+			else{
+				this.takeMoney();
+			}
+	}
+	public District build() {
+		System.out.println("You are building a district!");
+		byte choice = mScanner.nextByte();
+		District buildingThisTurn = this.getmHand().remove(choice);
+		this.getmTable().add(buildingThisTurn);
+		this.addmCoins((byte)-buildingThisTurn.getmPrice());
+		System.out.println("You had builded a " + buildingThisTurn);
+		return buildingThisTurn;
+		
+	}
+		
 }
