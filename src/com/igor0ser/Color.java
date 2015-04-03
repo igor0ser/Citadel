@@ -5,7 +5,6 @@ RED,
 GOLD,
 BLUE,
 PURPLE,
-bishopAbility,
 GREEN, 
 COLORLESS
 }
