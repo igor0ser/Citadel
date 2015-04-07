@@ -16,7 +16,7 @@ public class Player implements Comparable<Object> {
 	private Character mCharacter;
 	private boolean mKing; // король или нет
 	private boolean mRobbed; //обворован или нет 
-	private boolean mAlive; //убит или нет
+	private boolean mAlive = true; //убит или нет
 	private Random random = new Random();
 
 	public Player(String name) {
@@ -37,6 +37,7 @@ public class Player implements Comparable<Object> {
 
 	public void chooseCharacter(List<Character> characterDeck) {
 		mCharacter = characterDeck.remove(random.nextInt(characterDeck.size()));
+		System.out.println(mName + " выбрал " + mCharacter);
 	}
 
 	public void turn() {
@@ -58,6 +59,7 @@ public class Player implements Comparable<Object> {
 
 	public void takeMoney(int coins) {
 		mCoins += coins;
+		System.out.println(mName + " получает " + coins + " монет.");
 	}
 
 	private District takeCard() {
@@ -72,6 +74,7 @@ public class Player implements Comparable<Object> {
 				.remove(0);
 		Game.getmDistrictDeck().push(districtToChoose.get(0));
 		mHand.add(chosen);
+		System.out.println(mName + " берет карту " + chosen.getmName());
 		return chosen;
 	}
 
@@ -89,6 +92,7 @@ public class Player implements Comparable<Object> {
 		mTable.add(buildDistrict);
 		mHand.remove(buildDistrict);
 		mCoins = mCoins - buildDistrict.getmPrice();
+		System.out.println(mName + " построил " + buildDistrict.getmName());
 		return buildDistrict;
 	}
 
@@ -100,6 +104,8 @@ public class Player implements Comparable<Object> {
 			}
 		}
 		mCoins += result;
+		System.out.println(mName + " получил " + result
+				+ " монет за одноцветные кварталы.");
 		return result;
 	}
 
@@ -134,14 +140,29 @@ public class Player implements Comparable<Object> {
 		int robbed;
 		do {
 			robbed = random.nextInt(6) + 3;
-		} while (robbed != killedOne);
-		Game.getmPlayerList().get(robbed).setmRobbed(true);
+		} while (robbed == killedOne);
+
+		for (Player player : Game.getmPlayerList()) {
+			if (player.getmCharacter().getId() == robbed) {
+				player.mRobbed = true;
+			}
+		}
+
+		System.out.println(this.mName + " грабит игрoка с персонажем "
+				+ Name.values()[robbed - 1]);
+
 		return robbed;
 	}
 
 	public int kill() {
 		int whomToKill = random.nextInt(7) + 2;
-		Game.getmPlayerList().get(whomToKill).setmAlive(false);
+		for (Player player : Game.getmPlayerList()) {
+			if (player.getmCharacter().getId() == whomToKill) {
+				player.mAlive = false;
+			}
+		}
+		System.out.println(this.mName + " убивает игрoка с персонажем "
+				+ Name.values()[whomToKill - 1]);
 		return whomToKill;
 	}
 
@@ -152,6 +173,7 @@ public class Player implements Comparable<Object> {
 			}
 			setmKing(true);
 		}
+		System.out.println("Королем становится - " + this.mName);
 	}
 
 	public String getmName() {
@@ -189,8 +211,10 @@ public class Player implements Comparable<Object> {
 	public boolean ismAlive() {
 		if (!mAlive) {
 			mAlive = true;
+			System.out.println(mName + " мертв в этом ходу");
 			return false;
 		}
+		System.out.println(mName + " жив в этом ходу");
 		return true;
 	}
 
@@ -207,15 +231,17 @@ public class Player implements Comparable<Object> {
 	}
 
 	public String wizardChangeCards() {
-		if (Collections.max(mHand).getmPrice()<4){
-			return "Don't want to change";}
-		else {
-			if (mHand.size()<2){
+		if (Collections.max(mHand).getmPrice() < 4) {
+			System.out.println(mName + "(wizard) не меняется");
+			return "Don't want to change";
+		} else {
+			if (mHand.size() < 2) {
 				Player victim = Game.getmPlayerList().get(0);
-				for (Player player :  Game.getmPlayerList()){
-					if (player.mHand.size()>victim.mHand.size() && this!=player){
+				for (Player player : Game.getmPlayerList()) {
+					if (player.mHand.size() > victim.mHand.size()
+							&& this != player) {
 						victim = player;
-						 }
+					}
 				}
 				ArrayList<District> temp = new ArrayList<District>();
 				temp.addAll(mHand);
@@ -223,15 +249,17 @@ public class Player implements Comparable<Object> {
 				mHand.addAll(victim.mHand);
 				victim.mHand.clear();
 				victim.mHand.addAll(temp);
+				System.out.println(mName + "(wizard) меняется с "
+						+ victim.mName);
 				return "Change with " + victim.mName;
-			}
-			else{
+			} else {
 				int size = mHand.size();
 				Game.getmDistrictDeck().addAll(mHand);
 				mHand.clear();
 				for (int i = 0; i < size; i++) {
 					mHand.add(Game.getmDistrictDeck().pop());
 				}
+				System.out.println(mName + "(wizard) меняется с колодой");
 				return "Change with deck";
 			}
 		}
@@ -240,19 +268,24 @@ public class Player implements Comparable<Object> {
 	public District destroyDistrict() {
 		Player victim;
 		do {
-			victim = Game.getmPlayerList().get(random.nextInt(Game.getmPlayerList().size()-1));
-		} while (!victim.getmCharacter().getmName().equals(Name.WARLORD) && !victim.getmCharacter().getmName().equals(Name.BISHOP));
-		
-		District aim=null;
+			victim = Game.getmPlayerList().get(
+					random.nextInt(Game.getmPlayerList().size() - 1));
+		} while (!victim.getmCharacter().getmName().equals(Name.WARLORD)
+				&& !victim.getmCharacter().getmName().equals(Name.BISHOP));
+
+		District aim = null;
 		Collections.sort(victim.mTable);
-		for (District district : victim.mTable){
-			if (mCoins > district.getmPrice()-1){
-				mCoins-= (district.getmPrice()-1);
+		for (District district : victim.mTable) {
+			if (mCoins > district.getmPrice() - 1) {
+				mCoins -= (district.getmPrice() - 1);
 				aim = district;
 				break;
 			}
 		}
 		victim.mTable.remove(aim);
+		if (aim!=null){
+		System.out.println(mName + "уничтожил квартал" + aim.getmName()
+				+ "у игрока " + victim.mName);}
 		return aim;
 	}
 }

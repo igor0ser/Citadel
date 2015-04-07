@@ -7,11 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.igor0ser.Character.Name;
+
 public class Game {
 	private String mUserName; // имя игрока-человека
 	private static List<Player> mPlayerList = new ArrayList<Player>(); // игроки
 	private List<Player> mPlayerTemporarylList = new ArrayList<Player>(); // дополнительный list для промежуточного хранения игроков (во время нахождения короля)
-	private static ArrayDeque<District> mDistrictDeck; // колода кварталов
+	private static ArrayDeque<District> mDistrictDeck = new ArrayDeque<>(); // колода кварталов
 	private List<Character> characterDeck; // колода персонажей
 	private Random mRandom = new Random();
 
@@ -19,7 +21,7 @@ public class Game {
 		this.mUserName = userName;
 		//начало игры
 		mDistrictDeck.addAll(DistrictDeck.districtDeck()); // заполняем колоду кварталов
-		mPlayerList.add(new PlayerUser(userName)); //добавляем всех в список
+		mPlayerList.add(new Player(userName)); //добавляем всех в список
 		mPlayerList.add(new Player("Eddard Stark"));
 		mPlayerList.add(new Player("Robert Baratheon"));
 		mPlayerList.add(new Player("Rhaegar Targaryen"));
@@ -38,21 +40,30 @@ public class Game {
 
 	public Character step1() {
 		characterDeck = CharacterDeck.characterDeck(); // новая колода персонажей загружается
-		characterDeck.remove(mRandom.nextInt(characterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
-		return characterDeck.remove(mRandom.nextInt(characterDeck.size())); // одного - рубашкой вверх
+		Character out;
+		do {
+			out = characterDeck.get(mRandom.nextInt(characterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
+		} while (out.getmName().equals(Name.KING));
+		characterDeck.remove(out);
+		do {
+			out = characterDeck.get(mRandom.nextInt(characterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
+		} while (out.getmName().equals(Name.KING));
+		characterDeck.remove(out);
+		return out; // одного - рубашкой вверх
 	}
 
 	public Player step2() { //выбор персонажей
-		Player king=null;
+		Player king = null;
 		Iterator<Player> iterator = mPlayerList.iterator(); // король становиться первым по списку
 		while (iterator.hasNext()) {
 			Player player = iterator.next();
 			if (!player.ismKing()) {
 				iterator.remove();
 				mPlayerTemporarylList.add(player);
-			} else
+			} else {
 				king = player;
 				break;
+			}
 
 		}
 		mPlayerList.addAll(mPlayerTemporarylList);
@@ -67,14 +78,14 @@ public class Game {
 	public void step3() {
 		Collections.sort(mPlayerList);
 		for (Player player : mPlayerList) {
-			int whomToKill = 0;
+			int whomToKill = -1;
 			switch (player.getmCharacter().getmName()) {
 			case ASSASIN:
 				whomToKill = player.kill(); // кого-то убивают
 				player.turn();
 				break;
 			case THIEF:
-				if (player.ismAlive()) {  //проверка на жизнь переключает булиан в случае чего
+				if (player.ismAlive()) { //проверка на жизнь переключает булиан в случае чего
 					player.robb(whomToKill); // вроует у кого-то (кроме того кого уже убили)
 					player.turn();
 				}
@@ -129,11 +140,11 @@ public class Game {
 
 	public boolean step4() {
 		for (Player p : mPlayerList) {
-			if (p.getmHand().size() > 7) {
-				return false;
+			if (p.getmTable().size() > 7) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public static ArrayDeque<District> getmDistrictDeck() {

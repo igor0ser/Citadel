@@ -66,7 +66,7 @@ public class DistrictDeck {
 
 		ArrayList<District> deck = new ArrayList<District>(); // создаем колоду по количесиву типов в колоде
 		for (District card : typesOfCards) {
-			for (byte i = 0; i < card.getmQuantityInDeck(); i++) {
+			for (byte i = 0; i <= card.getmQuantityInDeck(); i++) {
 				deck.add(card);
 			}
 		}
