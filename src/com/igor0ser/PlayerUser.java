@@ -1,6 +1,5 @@
 package com.igor0ser;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -40,7 +39,7 @@ public class PlayerUser extends Player {
 				this.build();
 			}
 			else{
-				this.takeMoney();
+				//this.takeMoney();
 			}
 	}
 	public District build() {

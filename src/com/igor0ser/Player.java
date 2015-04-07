@@ -1,29 +1,22 @@
 package com.igor0ser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Player implements Comparable {
+import com.igor0ser.Character.Name;
 
-	public Character getmCharacter() {
-		return mCharacter;
-	}
-
-	public void setmCharacter(Character mCharacter) {
-		this.mCharacter = mCharacter;
-	}
+public class Player implements Comparable<Object> {
 
 	private String mName;
-	private byte mPoints;
-	private byte mCoins = 2;
+	private int mCoins = 2; // деньги - изначально по 2 монеты
 	private ArrayList<District> mHand = new ArrayList<District>();
 	private ArrayList<District> mTable = new ArrayList<District>();
 	private Character mCharacter;
-	private byte mDistrictsBuild;
 	private boolean mKing; // король или нет
-	private boolean mRobbed; //обворован  
-	private boolean mKilled; //убит
+	private boolean mRobbed; //обворован или нет 
+	private boolean mAlive; //убит или нет
 	private Random random = new Random();
 
 	public Player(String name) {
@@ -34,64 +27,80 @@ public class Player implements Comparable {
 		mHand.add(districtCard);
 	}
 
-	public boolean getIsKing() {
+	public boolean ismKing() {
 		return mKing;
 	}
 
-	public void setKing(boolean isKing) {
+	public void setmKing(boolean isKing) {
 		this.mKing = isKing;
 	}
 
 	public void chooseCharacter(List<Character> characterDeck) {
 		mCharacter = characterDeck.remove(random.nextInt(characterDeck.size()));
-		System.out.println("// " + mName + " has chosen " + mCharacter);
-	}
-
-	public District build() {
-		byte max = 0;
-		District buildingThisTurn = null;
-		for (District district : mHand) {
-			if ((district.getmPrice() < mCoins) && (district.getmPrice() > max)) {
-				max = district.getmPrice();
-				buildingThisTurn = district;
-			}
-		}
-		System.out.println("// " + mName + "has built a " + buildingThisTurn);
-		mCoins = (byte) (mCoins - buildingThisTurn.getmPrice());
-		mTable.add(buildingThisTurn);
-		mHand.remove(buildingThisTurn);
-		return buildingThisTurn;
-
-	}
-
-	public byte takeMoney() {
-		mCoins += 2;
-		System.out.println("// " + mName + " get 2 coins");
-		return mCoins;
-	}
-
-	public byte moneyForDistricts() {
-		for (District d : mTable) {
-			if (d.getmColor().equals(this.mCharacter.getmColor())) {
-				this.mCoins++;
-			}
-		}
-		return mCoins;
 	}
 
 	public void turn() {
-		boolean canBuild = false;
-		for (District district : mHand) {
-			if (mCoins > district.getmPrice())
-				canBuild = true; // проверяет хватает ли денег на постройку квартала
-		}
+		getMoneyForSameColorDistricts();
+		takeMoneyOrCards();
+		buildDistrict();
+	}
 
-		if ((random.nextInt(2) == 0) && canBuild) { // на рэндоме или строит или берет монеты 
-			build();
+	private boolean takeMoneyOrCards() {
+		if (Collections.max(mHand).getmPrice() > 3) {
+			takeMoney(2);
+			return true;
 		} else {
-			takeMoney();
+			takeCard();
+			return false;
 		}
 
+	}
+
+	public void takeMoney(int coins) {
+		mCoins += coins;
+	}
+
+	private District takeCard() {
+		District chosen;
+		ArrayList<District> districtToChoose = new ArrayList<District>();
+		districtToChoose.add(Game.getmDistrictDeck().pop());
+		districtToChoose.add(Game.getmDistrictDeck().pop());
+		Collections.sort(districtToChoose);
+		boolean isDuplicate = mTable.contains(districtToChoose.get(0))
+				|| mHand.contains(districtToChoose.get(0));
+		chosen = (isDuplicate) ? districtToChoose.remove(1) : districtToChoose
+				.remove(0);
+		Game.getmDistrictDeck().push(districtToChoose.get(0));
+		mHand.add(chosen);
+		return chosen;
+	}
+
+	public District buildDistrict() {
+		ArrayList<District> availableToBuild = new ArrayList<District>();
+		for (District district : mHand) {
+			if (mCoins >= district.getmPrice() && !mTable.contains(district)) {
+				availableToBuild.add(district);
+			}
+		}
+		if (availableToBuild.size() < 1) {
+			return null;
+		}
+		District buildDistrict = Collections.max(availableToBuild);
+		mTable.add(buildDistrict);
+		mHand.remove(buildDistrict);
+		mCoins = mCoins - buildDistrict.getmPrice();
+		return buildDistrict;
+	}
+
+	private int getMoneyForSameColorDistricts() {
+		int result = 0;
+		for (District district : mTable) {
+			if (mCharacter.getmColor().equals(district.getmColor())) {
+				result++;
+			}
+		}
+		mCoins += result;
+		return result;
 	}
 
 	@Override
@@ -106,6 +115,45 @@ public class Player implements Comparable {
 		}
 	}
 
+	public int checkRobbed() {
+		if (mRobbed) {
+			int stolen = mCoins;
+			mCoins = 0;
+			mRobbed = false;
+			for (Player player : Game.getmPlayerList()) {
+				if (player.mCharacter.getmName().equals(Name.THIEF)) {
+					player.mCoins += stolen;
+					return stolen;
+				}
+			}
+		}
+		return 0;
+	}
+
+	public int robb(int killedOne) {
+		int robbed;
+		do {
+			robbed = random.nextInt(6) + 3;
+		} while (robbed != killedOne);
+		Game.getmPlayerList().get(robbed).setmRobbed(true);
+		return robbed;
+	}
+
+	public int kill() {
+		int whomToKill = random.nextInt(7) + 2;
+		Game.getmPlayerList().get(whomToKill).setmAlive(false);
+		return whomToKill;
+	}
+
+	public void coronation() {
+		if (!mKing) {
+			for (Player player : Game.getmPlayerList()) {
+				player.setmKing(false);
+			}
+			setmKing(true);
+		}
+	}
+
 	public String getmName() {
 		return mName;
 	}
@@ -114,11 +162,11 @@ public class Player implements Comparable {
 		this.mName = mName;
 	}
 
-	public byte getmCoins() {
+	public int getmCoins() {
 		return mCoins;
 	}
 
-	public void addmCoins(byte addCoins) {
+	public void addmCoins(int addCoins) {
 		mCoins += addCoins;
 	}
 
@@ -138,11 +186,57 @@ public class Player implements Comparable {
 		this.mRobbed = mRobbed;
 	}
 
-	public boolean ismKilled() {
-		return mKilled;
+	public boolean ismAlive() {
+		if (!mAlive) {
+			mAlive = true;
+			return false;
+		}
+		return true;
 	}
 
-	public void setmKilled(boolean mKilled) {
-		this.mKilled = mKilled;
+	public void setmAlive(boolean mALive) {
+		this.mAlive = mALive;
+	}
+
+	public Character getmCharacter() {
+		return mCharacter;
+	}
+
+	public void setmCharacter(Character mCharacter) {
+		this.mCharacter = mCharacter;
+	}
+
+	public boolean wizardChangeCards() {
+		if (Collections.max(mHand).getmPrice()<4){
+			return false;}
+		else {
+			if (mHand.size()<2){
+				
+				return true;
+			}
+			else{
+				
+				return true;
+			}
+		}
+	}
+
+	public District destroyDistrict() {
+		Player victim;
+		do {
+			victim = Game.getmPlayerList().get(random.nextInt(Game.getmPlayerList().size()-1));
+		} while (!victim.getmCharacter().getmName().equals(Name.WARLORD) && !victim.getmCharacter().getmName().equals(Name.BISHOP));
+		
+		District aim=null;
+		Collections.sort(victim.mTable);
+		for (District district : victim.mTable){
+			if (mCoins > district.getmPrice()-1){
+				mCoins-= (district.getmPrice()-1);
+				aim = district;
+				break;
+			}
+		}
+		victim.mTable.remove(aim);
+		return aim;
 	}
 }

@@ -1,6 +1,6 @@
 package com.igor0ser;
 
-public class District {
+public class District implements Comparable<Object>{
 	private String mName;
 	private Color mColor;
 	private byte mPrice;
@@ -41,4 +41,15 @@ public class District {
 				+ mPrice + "]";
 	}
 	
+	@Override
+	public int compareTo(Object o) {
+		District other = (District) o;
+		if (mPrice > other.mPrice) {
+			return 1;
+		} else if (mPrice < other.mPrice) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
 }

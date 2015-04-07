@@ -7,14 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import com.igor0ser.Character.Name;
-import com.igor0ser.Character.Name;
-
 public class Game {
 	private String mUserName; // имя игрока-человека
-	private List<Player> mPlayerList = new ArrayList<Player>(); // игроки
+	private static List<Player> mPlayerList = new ArrayList<Player>(); // игроки
 	private List<Player> mPlayerTemporarylList = new ArrayList<Player>(); // дополнительный list для промежуточного хранения игроков (во время нахождения короля)
-	private ArrayDeque<District> mDistrictDeck; // колода кварталов
+	private static ArrayDeque<District> mDistrictDeck; // колода кварталов
 	private List<Character> characterDeck; // колода персонажей
 	private Random mRandom = new Random();
 
@@ -27,7 +24,7 @@ public class Game {
 		mPlayerList.add(new Player("Robert Baratheon"));
 		mPlayerList.add(new Player("Rhaegar Targaryen"));
 		mPlayerList.add(new Player("Tywin Lannister"));
-		mPlayerList.get(mRandom.nextInt(5)).setKing(true); // король - рэндомно
+		mPlayerList.get(mRandom.nextInt(5)).setmKing(true); // король - рэндомно
 
 		for (Player player : mPlayerList) {
 			for (int i = 0; i < 4; i++) {
@@ -50,7 +47,7 @@ public class Game {
 		Iterator<Player> iterator = mPlayerList.iterator(); // король становиться первым по списку
 		while (iterator.hasNext()) {
 			Player x = iterator.next();
-			if (!x.getIsKing()) {
+			if (!x.ismKing()) {
 				iterator.remove();
 				mPlayerTemporarylList.add(x);
 			} else
@@ -68,33 +65,61 @@ public class Game {
 	public void step3() {
 		Collections.sort(mPlayerList);
 		for (Player player : mPlayerList) {
-			int whomToKill=0;
+			int whomToKill = 0;
 			switch (player.getmCharacter().getmName()) {
 			case ASSASIN:
-				whomToKill = mRandom.nextInt(7)+2;
-				mPlayerList.get(whomToKill).setmKilled(true);
-				
+				whomToKill = player.kill(); // кого-то убивают
+				player.turn();
 				break;
 			case THIEF:
-
+				if (player.ismAlive()) {  //проверка на жизнь переключает булиан в случае чего
+					player.robb(whomToKill); // вроует у кого-то (кроме того кого уже убили)
+					player.turn();
+				}
 				break;
 			case MAGICIAN:
-
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+					player.wizardChangeCards();
+				}
 				break;
 			case KING:
-
+				player.coronation();
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+				}
 				break;
 			case BISHOP:
-
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+				}
 				break;
 			case MERCHANT:
-
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+					player.takeMoney(1);
+				}
 				break;
 			case ARCHITECT:
-
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+					player.buildDistrict(); // может строить до 3-х кварталов за раз
+					player.buildDistrict();
+					player.getmHand().add(mDistrictDeck.pop()); //берет две карты после хода
+					player.getmHand().add(mDistrictDeck.pop());
+				}
 				break;
 			case WARLORD:
-
+				if (player.ismAlive()) {
+					player.checkRobbed();
+					player.turn();
+					player.destroyDistrict();
+				}
 				break;
 			}
 		}
@@ -107,6 +132,14 @@ public class Game {
 			}
 		}
 		return true;
+	}
+
+	public static ArrayDeque<District> getmDistrictDeck() {
+		return mDistrictDeck;
+	}
+
+	public static List<Player> getmPlayerList() {
+		return mPlayerList;
 	}
 
 }
