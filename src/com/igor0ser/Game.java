@@ -42,15 +42,16 @@ public class Game {
 		return characterDeck.remove(mRandom.nextInt(characterDeck.size())); // одного - рубашкой вверх
 	}
 
-	public void step2() { //выбор персонажей
-
+	public Player step2() { //выбор персонажей
+		Player king=null;
 		Iterator<Player> iterator = mPlayerList.iterator(); // король становиться первым по списку
 		while (iterator.hasNext()) {
-			Player x = iterator.next();
-			if (!x.ismKing()) {
+			Player player = iterator.next();
+			if (!player.ismKing()) {
 				iterator.remove();
-				mPlayerTemporarylList.add(x);
+				mPlayerTemporarylList.add(player);
 			} else
+				king = player;
 				break;
 
 		}
@@ -60,6 +61,7 @@ public class Game {
 		for (Player p : mPlayerList) { //каждый выбирает персонажа
 			p.chooseCharacter(characterDeck);
 		}
+		return king;
 	}
 
 	public void step3() {
@@ -127,7 +129,7 @@ public class Game {
 
 	public boolean step4() {
 		for (Player p : mPlayerList) {
-			if (p.getmHand().size() > 8) {
+			if (p.getmHand().size() > 7) {
 				return false;
 			}
 		}

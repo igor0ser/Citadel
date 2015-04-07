@@ -206,17 +206,33 @@ public class Player implements Comparable<Object> {
 		this.mCharacter = mCharacter;
 	}
 
-	public boolean wizardChangeCards() {
+	public String wizardChangeCards() {
 		if (Collections.max(mHand).getmPrice()<4){
-			return false;}
+			return "Don't want to change";}
 		else {
 			if (mHand.size()<2){
-				
-				return true;
+				Player victim = Game.getmPlayerList().get(0);
+				for (Player player :  Game.getmPlayerList()){
+					if (player.mHand.size()>victim.mHand.size() && this!=player){
+						victim = player;
+						 }
+				}
+				ArrayList<District> temp = new ArrayList<District>();
+				temp.addAll(mHand);
+				mHand.clear();
+				mHand.addAll(victim.mHand);
+				victim.mHand.clear();
+				victim.mHand.addAll(temp);
+				return "Change with " + victim.mName;
 			}
 			else{
-				
-				return true;
+				int size = mHand.size();
+				Game.getmDistrictDeck().addAll(mHand);
+				mHand.clear();
+				for (int i = 0; i < size; i++) {
+					mHand.add(Game.getmDistrictDeck().pop());
+				}
+				return "Change with deck";
 			}
 		}
 	}
