@@ -16,7 +16,7 @@ public class Game {
 	private List<Player> mPlayerTemporarylList = new ArrayList<Player>(); // дополнительный list для промежуточного хранения игроков (во время нахождения короля)
 	private ArrayDeque<District> mDistrictDeck; // колода кварталов
 	private List<Character> characterDeck; // колода персонажей
-	private Random random = new Random();
+	private Random mRandom = new Random();
 
 	public Game(String userName) {
 		this.mUserName = userName;
@@ -27,7 +27,7 @@ public class Game {
 		mPlayerList.add(new Player("Robert Baratheon"));
 		mPlayerList.add(new Player("Rhaegar Targaryen"));
 		mPlayerList.add(new Player("Tywin Lannister"));
-		mPlayerList.get(random.nextInt(5)).setKing(true); // король - рэндомно
+		mPlayerList.get(mRandom.nextInt(5)).setKing(true); // король - рэндомно
 
 		for (Player player : mPlayerList) {
 			for (int i = 0; i < 4; i++) {
@@ -41,8 +41,8 @@ public class Game {
 
 	public Character step1() {
 		characterDeck = CharacterDeck.characterDeck(); // новая колода персонажей загружается
-		characterDeck.remove(random.nextInt(characterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
-		return characterDeck.remove(random.nextInt(characterDeck.size())); // одного - рубашкой вверх
+		characterDeck.remove(mRandom.nextInt(characterDeck.size())); // одного персонажа выбрасывает рубашкой вниз
+		return characterDeck.remove(mRandom.nextInt(characterDeck.size())); // одного - рубашкой вверх
 	}
 
 	public void step2() { //выбор персонажей
@@ -68,9 +68,12 @@ public class Game {
 	public void step3() {
 		Collections.sort(mPlayerList);
 		for (Player player : mPlayerList) {
+			int whomToKill=0;
 			switch (player.getmCharacter().getmName()) {
 			case ASSASIN:
-
+				whomToKill = mRandom.nextInt(7)+2;
+				mPlayerList.get(whomToKill).setmKilled(true);
+				
 				break;
 			case THIEF:
 

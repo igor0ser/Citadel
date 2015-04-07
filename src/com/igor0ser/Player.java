@@ -21,7 +21,9 @@ public class Player implements Comparable {
 	private ArrayList<District> mTable = new ArrayList<District>();
 	private Character mCharacter;
 	private byte mDistrictsBuild;
-	private boolean isKing;
+	private boolean mKing; // король или нет
+	private boolean mRobbed; //обворован  
+	private boolean mKilled; //убит
 	private Random random = new Random();
 
 	public Player(String name) {
@@ -33,11 +35,11 @@ public class Player implements Comparable {
 	}
 
 	public boolean getIsKing() {
-		return isKing;
+		return mKing;
 	}
 
 	public void setKing(boolean isKing) {
-		this.isKing = isKing;
+		this.mKing = isKing;
 	}
 
 	public void chooseCharacter(List<Character> characterDeck) {
@@ -126,5 +128,21 @@ public class Player implements Comparable {
 
 	public ArrayList<District> getmHand() {
 		return mHand;
+	}
+
+	public boolean ismRobbed() {
+		return mRobbed;
+	}
+
+	public void setmRobbed(boolean mRobbed) {
+		this.mRobbed = mRobbed;
+	}
+
+	public boolean ismKilled() {
+		return mKilled;
+	}
+
+	public void setmKilled(boolean mKilled) {
+		this.mKilled = mKilled;
 	}
 }

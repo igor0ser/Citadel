@@ -30,9 +30,6 @@ public class Character {
 		return mColor;
 	}
 
-	/**
-	 * @return the mName
-	 */
 	public Name getmName() {
 		return mName;
 	}
