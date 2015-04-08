@@ -47,7 +47,7 @@ public class Player implements Comparable<Object> {
 	}
 
 	private boolean takeMoneyOrCards() {
-		if (Collections.max(mHand).getmPrice() > 3) {
+		if (mHand.size() > 0 && Collections.max(mHand).getmPrice() > 3) {
 			takeMoney(2);
 			return true;
 		} else {
@@ -98,14 +98,16 @@ public class Player implements Comparable<Object> {
 
 	private int getMoneyForSameColorDistricts() {
 		int result = 0;
-		for (District district : mTable) {
-			if (mCharacter.getmColor().equals(district.getmColor())) {
-				result++;
+		if (!mCharacter.getmColor().equals(Color.COLORLESS)) {
+			for (District district : mTable) {
+				if (mCharacter.getmColor().equals(district.getmColor())) {
+					result++;
+				}
 			}
+			mCoins += result;
+			System.out.println(mName + " получил " + result
+					+ " монет за одноцветные кварталы.");
 		}
-		mCoins += result;
-		System.out.println(mName + " получил " + result
-				+ " монет за одноцветные кварталы.");
 		return result;
 	}
 
@@ -173,7 +175,8 @@ public class Player implements Comparable<Object> {
 			}
 			setmKing(true);
 		}
-		System.out.println("Королем становится - " + this.mName);
+		System.out
+				.println("!!!КОРОНАЦИЯ!!! Королем становится - " + this.mName);
 	}
 
 	public String getmName() {
@@ -231,7 +234,7 @@ public class Player implements Comparable<Object> {
 	}
 
 	public String wizardChangeCards() {
-		if (Collections.max(mHand).getmPrice() < 4) {
+		if (mHand.size() > 3 && Collections.max(mHand).getmPrice() > 3) {
 			System.out.println(mName + "(wizard) не меняется");
 			return "Don't want to change";
 		} else {
@@ -270,8 +273,8 @@ public class Player implements Comparable<Object> {
 		do {
 			victim = Game.getmPlayerList().get(
 					random.nextInt(Game.getmPlayerList().size() - 1));
-		} while (!victim.getmCharacter().getmName().equals(Name.WARLORD)
-				&& !victim.getmCharacter().getmName().equals(Name.BISHOP));
+		} while (victim.getmCharacter().getmName().equals(Name.WARLORD)
+				|| victim.getmCharacter().getmName().equals(Name.BISHOP));
 
 		District aim = null;
 		Collections.sort(victim.mTable);
@@ -283,9 +286,38 @@ public class Player implements Comparable<Object> {
 			}
 		}
 		victim.mTable.remove(aim);
-		if (aim!=null){
-		System.out.println(mName + "уничтожил квартал" + aim.getmName()
-				+ "у игрока " + victim.mName);}
+		if (aim != null) {
+			System.out.println(mName + "уничтожил квартал" + aim.getmName()
+					+ "у игрока " + victim.mName);
+		}
 		return aim;
+	}
+
+	public int points(boolean first) {
+		int result = 0;
+
+		if (mHand.size() > 7) {
+			if (first) {
+				result += 4;
+			} else {
+				result += 2;
+			}
+		}
+
+		for (District district : mTable) {
+			result += district.getmPrice();
+			if (district.getmName().equals("Univercity")
+					|| district.getmName().equals("Dragon Gate")) {
+				result += 2;
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return mName + "(" + mCharacter + ") " + mTable.size() + "кв/ "
+				+ mHand.size() + "карт/ " + mCoins + "мон";
 	}
 }

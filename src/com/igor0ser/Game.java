@@ -10,7 +10,6 @@ import java.util.Random;
 import com.igor0ser.Character.Name;
 
 public class Game {
-	private String mUserName; // имя игрока-человека
 	private static List<Player> mPlayerList = new ArrayList<Player>(); // игроки
 	private List<Player> mPlayerTemporarylList = new ArrayList<Player>(); // дополнительный list для промежуточного хранения игроков (во время нахождения короля)
 	private static ArrayDeque<District> mDistrictDeck = new ArrayDeque<>(); // колода кварталов
@@ -18,14 +17,13 @@ public class Game {
 	private Random mRandom = new Random();
 
 	public Game(String userName) {
-		this.mUserName = userName;
 		//начало игры
 		mDistrictDeck.addAll(DistrictDeck.districtDeck()); // заполняем колоду кварталов
-		mPlayerList.add(new Player(userName)); //добавляем всех в список
-		mPlayerList.add(new Player("Eddard Stark"));
-		mPlayerList.add(new Player("Robert Baratheon"));
-		mPlayerList.add(new Player("Rhaegar Targaryen"));
-		mPlayerList.add(new Player("Tywin Lannister"));
+		mPlayerList.add(new Player("HARRY")); //добавляем всех в список
+		mPlayerList.add(new Player("RYAN"));
+		mPlayerList.add(new Player("JAMIE"));
+		mPlayerList.add(new Player("STEVE"));
+		mPlayerList.add(new Player("BEN"));
 		mPlayerList.get(mRandom.nextInt(5)).setmKing(true); // король - рэндомно
 
 		for (Player player : mPlayerList) {
@@ -62,6 +60,7 @@ public class Game {
 				mPlayerTemporarylList.add(player);
 			} else {
 				king = player;
+				System.out.println("Первым ходит король - " + king.getmName() + ", остальные после него по порядку!");
 				break;
 			}
 
@@ -78,6 +77,7 @@ public class Game {
 	public void step3() {
 		Collections.sort(mPlayerList);
 		for (Player player : mPlayerList) {
+			System.out.println("Ходит " + player);
 			int whomToKill = -1;
 			switch (player.getmCharacter().getmName()) {
 			case ASSASIN:
@@ -135,16 +135,22 @@ public class Game {
 				}
 				break;
 			}
+			System.out.println("Походил " + player);
+			System.out.println("*********************************************");
 		}
+		System.out.println("------------- карт осталось: " + mDistrictDeck.size());
 	}
 
 	public boolean step4() {
-		for (Player p : mPlayerList) {
-			if (p.getmTable().size() > 7) {
-				return true;
+		for (Player player : mPlayerList) {
+			if (player.getmTable().size() > 7) {
+				System.out.println("ПОБЕДИЛ " + player);
+				return false;
 			}
 		}
-		return false;
+		System.out.println("Никто пока не постриол 8-й квартал. Игра продолжается.");
+		System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
+		return true;
 	}
 
 	public static ArrayDeque<District> getmDistrictDeck() {

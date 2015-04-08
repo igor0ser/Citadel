@@ -37,8 +37,7 @@ public class District implements Comparable<Object>{
 
 	@Override
 	public String toString() {
-		return "[Name=" + mName + ", Color=" + mColor + ", Price="
-				+ mPrice + "]";
+		return  mName;
 	}
 	
 	@Override

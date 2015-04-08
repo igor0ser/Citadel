@@ -19,7 +19,7 @@ public class Character {
 
 	@Override
 	public String toString() {
-		return "[id=" + id + ", came=" + mName + ", color=" + mColor + "]";
+		return mName.toString();
 	}
 
 	enum Name {
