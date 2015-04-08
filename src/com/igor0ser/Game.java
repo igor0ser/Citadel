@@ -2,6 +2,7 @@ package com.igor0ser;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +61,8 @@ public class Game {
 				mPlayerTemporarylList.add(player);
 			} else {
 				king = player;
-				System.out.println("Первым ходит король - " + king.getmName() + ", остальные после него по порядку!");
+				System.out.println("Первым ходит король - " + king.getmName()
+						+ ", остальные после него по порядку!");
 				break;
 			}
 
@@ -75,8 +77,10 @@ public class Game {
 	}
 
 	public void step3() {
-		Collections.sort(mPlayerList);
-		for (Player player : mPlayerList) {
+		ArrayList<Player> thisTurnList = new ArrayList<>();
+		thisTurnList.addAll(mPlayerList);
+		Collections.sort(thisTurnList);
+		for (Player player : thisTurnList) {
 			System.out.println("Ходит " + player);
 			int whomToKill = -1;
 			switch (player.getmCharacter().getmName()) {
@@ -138,18 +142,40 @@ public class Game {
 			System.out.println("Походил " + player);
 			System.out.println("*********************************************");
 		}
-		System.out.println("------------- карт осталось: " + mDistrictDeck.size());
+		System.out.println("------------- карт осталось: "
+				+ mDistrictDeck.size());
 	}
 
 	public boolean step4() {
+		boolean district8 = false;
 		for (Player player : mPlayerList) {
 			if (player.getmTable().size() > 7) {
-				System.out.println("ПОБЕДИЛ " + player);
-				return false;
+				player.setFirstBuild8Dustricts(true);
+				district8 = true;
+				break;
 			}
 		}
-		System.out.println("Никто пока не постриол 8-й квартал. Игра продолжается.");
-		System.out.println("-------------------------------------------------------------------------------------------------------------------------------");
+		if (district8){
+			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>ИГРА ОКОНЧЕНА<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+			int max=0;
+			Player winner = null;
+			for (Player player : mPlayerList) {
+				System.out.println(player);
+				System.out.println(Arrays.toString(player.getmTable().toArray()));
+				System.out.println(">>Очки: " + player.points());
+				if (player.points()>max){
+					max=player.points();
+					winner = player;
+				}
+			}
+			System.out.println("Победил - " + winner.getmName() + "!!!");
+			return false;
+		}
+		
+		System.out
+				.println("Никто пока не постриол 8-й квартал. Игра продолжается.");
+		System.out
+				.println("-------------------------------------------------------------------------------------------------------------------------------");
 		return true;
 	}
 

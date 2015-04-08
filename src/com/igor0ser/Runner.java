@@ -17,6 +17,5 @@ public class Runner {
 			System.out.println("иру 4");
 			} while (game.step4());
 
-		//game.step4();
 	}
 }

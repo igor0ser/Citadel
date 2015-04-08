@@ -17,6 +17,7 @@ public class Player implements Comparable<Object> {
 	private boolean mKing; // король или нет
 	private boolean mRobbed; //обворован или нет 
 	private boolean mAlive = true; //убит или нет
+	private boolean firstBuild8Dustricts;
 	private Random random = new Random();
 
 	public Player(String name) {
@@ -100,7 +101,8 @@ public class Player implements Comparable<Object> {
 		int result = 0;
 		if (!mCharacter.getmColor().equals(Color.COLORLESS)) {
 			for (District district : mTable) {
-				if (mCharacter.getmColor().equals(district.getmColor())) {
+				if (mCharacter.getmColor().equals(district.getmColor())
+						|| district.getmName().equals("School of Magic")) {
 					result++;
 				}
 			}
@@ -276,28 +278,34 @@ public class Player implements Comparable<Object> {
 		} while (victim.getmCharacter().getmName().equals(Name.WARLORD)
 				|| victim.getmCharacter().getmName().equals(Name.BISHOP));
 
-		District aim = null;
-		Collections.sort(victim.mTable);
+		ArrayList<District> availableToDestroy = new ArrayList<>();
 		for (District district : victim.mTable) {
-			if (mCoins > district.getmPrice() - 1) {
-				mCoins -= (district.getmPrice() - 1);
-				aim = district;
-				break;
+			if (mCoins > district.getmPrice() - 1
+					&& !district.getmName().equals("Keep")) {
+				availableToDestroy.add(district);
 			}
 		}
-		victim.mTable.remove(aim);
-		if (aim != null) {
-			System.out.println(mName + "уничтожил квартал" + aim.getmName()
-					+ "у игрока " + victim.mName);
+		if (availableToDestroy.size() < 1) {
+			System.out.println(mName + " не уничтожил ни одного квартала ");
+			return null;
+
+		} else {
+			District aim = availableToDestroy.remove(random
+					.nextInt(availableToDestroy.size()));
+			victim.mTable.remove(aim);
+			mCoins-=aim.getmPrice()+1;
+			System.out.println(mName + " уничтожил квартал " + aim
+					+ " у игрока " + victim.mName);
+			return aim;
 		}
-		return aim;
+
 	}
 
-	public int points(boolean first) {
+	public int points() {
 		int result = 0;
 
-		if (mHand.size() > 7) {
-			if (first) {
+		if (mTable.size() > 7) {
+			if (firstBuild8Dustricts) {
 				result += 4;
 			} else {
 				result += 2;
@@ -312,6 +320,10 @@ public class Player implements Comparable<Object> {
 			}
 		}
 
+		if (DistrictDeck.colorsOfDistrict(mTable) > 4) {
+			result += 3;
+		}
+
 		return result;
 	}
 
@@ -319,5 +331,13 @@ public class Player implements Comparable<Object> {
 	public String toString() {
 		return mName + "(" + mCharacter + ") " + mTable.size() + "кв/ "
 				+ mHand.size() + "карт/ " + mCoins + "мон";
+	}
+
+	public void setFirstBuild8Dustricts(boolean firstBuild8Dustricts) {
+		this.firstBuild8Dustricts = firstBuild8Dustricts;
+	}
+
+	public boolean isFirstBuild8Dustricts() {
+		return firstBuild8Dustricts;
 	}
 }

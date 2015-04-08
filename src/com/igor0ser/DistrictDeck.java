@@ -75,4 +75,19 @@ public class DistrictDeck {
 		return deck;
 	}
 
+	static int colorsOfDistrict(ArrayList<District> table) {
+		int result = 0;
+		ArrayList<Color> colors = new ArrayList<>();
+		for (District district : table) {
+			if (district.getmName().equals("Haunted City")
+					&& table.indexOf(district) < 8) {
+				result++;
+			} else if (!colors.contains(district.getmColor())) {
+				colors.add(district.getmColor());
+			}
+		}
+		result += colors.size();
+		return result;
+	}
+
 }
