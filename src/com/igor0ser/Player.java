@@ -24,8 +24,28 @@ public class Player implements Comparable<Object> {
 		mName = name;
 	}
 
-	public void addCard(District districtCard) {
-		mHand.add(districtCard);
+	public String getmName() {
+		return mName;
+	}
+
+	public void setmName(String mName) {
+		this.mName = mName;
+	}
+
+	public int getmCoins() {
+		return mCoins;
+	}
+
+	public void addmCoins(int addCoins) {
+		mCoins += addCoins;
+	}
+
+	public ArrayList<District> getmTable() {
+		return mTable;
+	}
+
+	public ArrayList<District> getmHand() {
+		return mHand;
 	}
 
 	public boolean ismKing() {
@@ -34,6 +54,10 @@ public class Player implements Comparable<Object> {
 
 	public void setmKing(boolean isKing) {
 		this.mKing = isKing;
+	}
+
+	public void addCard(District districtCard) {
+		mHand.add(districtCard);
 	}
 
 	public void chooseCharacter(List<Character> characterDeck) {
@@ -68,12 +92,18 @@ public class Player implements Comparable<Object> {
 		ArrayList<District> districtToChoose = new ArrayList<District>();
 		districtToChoose.add(Game.getmDistrictDeck().pop());
 		districtToChoose.add(Game.getmDistrictDeck().pop());
+		if (this.controlsDistrict("Observatory")) {
+			districtToChoose.add(Game.getmDistrictDeck().pop());
+		}
 		Collections.sort(districtToChoose);
 		boolean isDuplicate = mTable.contains(districtToChoose.get(0))
 				|| mHand.contains(districtToChoose.get(0));
 		chosen = (isDuplicate) ? districtToChoose.remove(1) : districtToChoose
 				.remove(0);
-		Game.getmDistrictDeck().push(districtToChoose.get(0));
+		if (this.controlsDistrict("Library")) {
+			mHand.add(districtToChoose.remove(0));
+		}
+		Game.getmDistrictDeck().addAll(districtToChoose);
 		mHand.add(chosen);
 		System.out.println(mName + " берет карту " + chosen.getmName());
 		return chosen;
@@ -181,30 +211,6 @@ public class Player implements Comparable<Object> {
 				.println("!!!КОРОНАЦИЯ!!! Королем становится - " + this.mName);
 	}
 
-	public String getmName() {
-		return mName;
-	}
-
-	public void setmName(String mName) {
-		this.mName = mName;
-	}
-
-	public int getmCoins() {
-		return mCoins;
-	}
-
-	public void addmCoins(int addCoins) {
-		mCoins += addCoins;
-	}
-
-	public ArrayList<District> getmTable() {
-		return mTable;
-	}
-
-	public ArrayList<District> getmHand() {
-		return mHand;
-	}
-
 	public boolean ismRobbed() {
 		return mRobbed;
 	}
@@ -261,7 +267,10 @@ public class Player implements Comparable<Object> {
 				int size = mHand.size();
 				Game.getmDistrictDeck().addAll(mHand);
 				mHand.clear();
+				System.out.println(mName + "(wizard) меняется с колодой");
 				for (int i = 0; i < size; i++) {
+					System.out.println(mName + " взял "
+							+ Game.getmDistrictDeck().peek());
 					mHand.add(Game.getmDistrictDeck().pop());
 				}
 				System.out.println(mName + "(wizard) меняется с колодой");
@@ -279,8 +288,9 @@ public class Player implements Comparable<Object> {
 				|| victim.getmCharacter().getmName().equals(Name.BISHOP));
 
 		ArrayList<District> availableToDestroy = new ArrayList<>();
+		int zero = (victim.controlsDistrict("Great Wall")) ? 1 : 0;
 		for (District district : victim.mTable) {
-			if (mCoins > district.getmPrice() - 1
+			if (mCoins > district.getmPrice() - 1 + zero
 					&& !district.getmName().equals("Keep")) {
 				availableToDestroy.add(district);
 			}
@@ -293,17 +303,24 @@ public class Player implements Comparable<Object> {
 			District aim = availableToDestroy.remove(random
 					.nextInt(availableToDestroy.size()));
 			victim.mTable.remove(aim);
-			mCoins-=aim.getmPrice()+1;
+			mCoins -= aim.getmPrice() - zero + 1;
 			System.out.println(mName + " уничтожил квартал " + aim
 					+ " у игрока " + victim.mName);
+			
+			for (Player player : Game.getmPlayerList()){
+				if (player.controlsDistrict("Graveyard")){
+					player.graveyardAbility(aim); 
+				}
+			}
+			
+			
 			return aim;
 		}
 
 	}
-
+		
 	public int points() {
 		int result = 0;
-
 		if (mTable.size() > 7) {
 			if (firstBuild8Dustricts) {
 				result += 4;
@@ -327,17 +344,81 @@ public class Player implements Comparable<Object> {
 		return result;
 	}
 
-	@Override
-	public String toString() {
-		return mName + "(" + mCharacter + ") " + mTable.size() + "кв/ "
-				+ mHand.size() + "карт/ " + mCoins + "мон";
-	}
-
 	public void setFirstBuild8Dustricts(boolean firstBuild8Dustricts) {
 		this.firstBuild8Dustricts = firstBuild8Dustricts;
 	}
 
 	public boolean isFirstBuild8Dustricts() {
 		return firstBuild8Dustricts;
+	}
+
+	public boolean controlsDistrict(String districtName) {
+		for (District district : mTable) {
+			if (district.getmName().equals(districtName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void cardAbilities() {
+		labaratoryAbility();
+	}
+
+	public District labaratoryAbility() {
+		if (this.controlsDistrict("Labaratory")) {
+			for (District district : mHand) {
+				if (mTable.contains(district)) {
+					Game.getmDistrictDeck().push(district);
+					mHand.remove(district);
+					mCoins++;
+					System.out.println(this
+							+ "использовал способность Labaratory. Он сбросил "
+							+ district.getmName());
+					return district;
+				}
+			}
+			for (District district : mHand) {
+				if (district.getmPrice() <= 2) {
+					Game.getmDistrictDeck().push(district);
+					mHand.remove(district);
+					mCoins++;
+					System.out.println(this
+							+ "использовал способность Labaratory. Он сбросил "
+							+ district.getmName());
+					return district;
+				}
+			}
+
+		}
+		return null;
+	}
+
+	public void smithyAbilitiy() {
+		if (this.controlsDistrict("Smithy")) {
+			if (mCoins >= 2 && mHand.size() < 3) {
+				mCoins -= 2;
+				mHand.add(Game.getmDistrictDeck().pop());
+				mHand.add(Game.getmDistrictDeck().pop());
+				mHand.add(Game.getmDistrictDeck().pop());
+				System.out
+						.println(this
+								+ "использовал способность Labaratory. Он взял 3 карты.");
+			}
+		}
+	}
+
+	public void graveyardAbility(District district){
+		if (mCoins>=1 && !mTable.contains(district) && !mHand.contains(district)){
+			System.out.println(this + "использовал способность Graveyard. Он забрал себе " + district.getmName());
+			mHand.add(district);
+		}
+		
+	}
+	
+	@Override
+	public String toString() {
+		return mName + "(" + mCharacter + ") " + mTable.size() + "кв/ "
+				+ mHand.size() + "карт/ " + mCoins + "мон";
 	}
 }

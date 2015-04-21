@@ -98,6 +98,7 @@ public class Game {
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 					player.wizardChangeCards();
 				}
 				break;
@@ -106,18 +107,21 @@ public class Game {
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 				}
 				break;
 			case BISHOP:
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 				}
 				break;
 			case MERCHANT:
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 					player.takeMoney(1);
 				}
 				break;
@@ -125,6 +129,7 @@ public class Game {
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 					player.buildDistrict(); // может строить до 3-х кварталов за раз
 					player.buildDistrict();
 					player.getmHand().add(mDistrictDeck.pop()); //берет две карты после хода
@@ -135,6 +140,7 @@ public class Game {
 				if (player.ismAlive()) {
 					player.checkRobbed();
 					player.turn();
+					player.cardAbilities();
 					player.destroyDistrict();
 				}
 				break;
@@ -155,23 +161,25 @@ public class Game {
 				break;
 			}
 		}
-		if (district8){
-			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>ИГРА ОКОНЧЕНА<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-			int max=0;
+		if (district8) {
+			System.out
+					.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>ИГРА ОКОНЧЕНА<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+			int max = 0;
 			Player winner = null;
 			for (Player player : mPlayerList) {
 				System.out.println(player);
-				System.out.println(Arrays.toString(player.getmTable().toArray()));
+				System.out.println(Arrays
+						.toString(player.getmTable().toArray()));
 				System.out.println(">>Очки: " + player.points());
-				if (player.points()>max){
-					max=player.points();
+				if (player.points() > max) {
+					max = player.points();
 					winner = player;
 				}
 			}
 			System.out.println("Победил - " + winner.getmName() + "!!!");
 			return false;
 		}
-		
+
 		System.out
 				.println("Никто пока не постриол 8-й квартал. Игра продолжается.");
 		System.out

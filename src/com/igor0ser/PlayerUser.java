@@ -9,10 +9,7 @@ public class PlayerUser extends Player {
 	public PlayerUser(String name) {
 		super(name);
 	}
-	
-	
-	
-	
+		
 	@Override
 
 	public void chooseCharacter(List<Character> characterDeck){
